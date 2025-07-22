@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>마이페이지</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/mypage/mypage.css">
+</head>
+<body>
+<div class="container">
+
+    <h1>👤 마이페이지</h1>
+
+    <div class="info">
+        <p><strong>이메일:</strong> [[${email}]]</p>
+        <p><strong>닉네임:</strong> [[${nickname}]]</p>
+    </div>
+
+    <h3><span class="emoji">❤️</span> 찜한 산책로</h3>
+    <div class="favorites">
+        <p th:if="${#lists.isEmpty(favorites.content)}">찜한 산책로가 없습니다.</p>
+
+        <div class="favorite-item" th:each="course : ${favorites.content}">
+            <a th:href="@{'/courses/' + ${course.id}}" th:text="${course.name}">코스명</a>
+        </div>
+    </div>
+
+    <h3><span class="emoji">📝</span> 내가 작성한 게시글</h3>
+    <div class="favorites">
+        <p th:if="${#lists.isEmpty(myPosts.content)}">작성한 게시글이 없습니다.</p>
+        <div class="favorite-item" th:each="post : ${myPosts.content}">
+            <a th:href="@{'/board/' + ${post.id}}" th:text="${post.boardTitle}">제목</a>
+        </div>
+    </div>
+
+    <div class="pagination" th:if="${myPosts.totalPages > 1}">
+        <a th:href="@{/mypage(postPage=${myPosts.number - 1}, page=${favorites.number}, commentPage=${myComments.number})}"
+           th:classappend="${!myPosts.hasPrevious()} ? 'disabled'">‹ 이전</a>
+        <span th:text="${myPosts.number + 1} + ' / ' + ${myPosts.totalPages}">1 / 1</span>
+        <a th:href="@{/mypage(postPage=${myPosts.number + 1}, page=${favorites.number}, commentPage=${myComments.number})}"
+           th:classappend="${!myPosts.hasNext()} ? 'disabled'">다음 ›</a>
+    </div>
+
+    <h3><span class="emoji">💬</span> 내가 작성한 댓글</h3>
+    <div class="favorites">
+        <p th:if="${#lists.isEmpty(myComments.content)}">작성한 댓글이 없습니다.</p>
+        <div class="favorite-item" th:each="comment : ${myComments.content}">
+            <a th:href="@{'/board/' + ${comment.boardEntity.id}}" th:text="${comment.commentContents}">댓글내용</a>
+        </div>
+    </div>
+
+    <div class="pagination" th:if="${myComments.totalPages > 1}">
+        <a th:href="@{/mypage(commentPage=${myComments.number - 1}, page=${favorites.number}, postPage=${myPosts.number})}"
+           th:classappend="${!myComments.hasPrevious()} ? 'disabled'">‹ 이전</a>
+        <span th:text="${myComments.number + 1} + ' / ' + ${myComments.totalPages}">1 / 1</span>
+        <a th:href="@{/mypage(commentPage=${myComments.number + 1}, page=${favorites.number}, postPage=${myPosts.number})}"
+           th:classappend="${!myComments.hasNext()} ? 'disabled'">다음 ›</a>
+    </div>
+
+    <!-- 📄 페이지네이션 -->
+    <div class="pagination" th:if="${favorites.totalPages > 1}">
+        <a th:href="${favorites.hasPrevious()} ? @{/mypage(page=${favorites.number - 1})} : '#'"
+           th:classappend="${!favorites.hasPrevious()} ? 'disabled'">‹ 이전</a>
+
+        <span th:text="${favorites.number + 1} + ' / ' + ${favorites.totalPages}">1 / 1</span>
+
+        <a th:href="${favorites.hasNext()} ? @{/mypage(page=${favorites.number + 1})} : '#'"
+           th:classappend="${!favorites.hasNext()} ? 'disabled'">다음 ›</a>
+    </div>
+
+    <a class="back-link" th:href="@{/courses}">← 산책 코스 목록</a>
+
+</div>
+</body>
+</html>

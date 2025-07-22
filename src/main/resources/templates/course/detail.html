@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${course.name} + ' 상세 정보'">코스 상세</title>
+    <link rel="stylesheet" href="/css/course/detail.css">
+
+    <script type="text/javascript"
+            src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f875aaa396a57ff0e17e90cb143352f8&libraries=services"></script>
+</head>
+<body>
+<div class="container">
+
+    <h2><span class="icon">🌿</span><span th:text="${course.name}">코스명</span></h2>
+
+    <ul class="course-detail-list">
+        <li><strong>거리:</strong> <span th:text="${course.distanceKm} + ' km'"></span></li>
+        <li><strong>소요시간:</strong> <span th:text="${#strings.replace(course.duration, '시간', '시간 ')}"></span></li>
+        <li><strong>난이도:</strong>
+            <span th:text="${course.level == 1 ? '초급' : (course.level == 2 ? '중급' : (course.level == 3 ? '고급' : '알 수 없음'))}"></span>
+        </li>
+        <li><strong>찜 개수:</strong> <span th:text="${course.favoriteCount} + '개'"></span></li>
+    </ul>
+
+    <!-- 카카오맵 경로 보기 버튼 -->
+    <form onsubmit="return openKakaoMapRoute();">
+        <button type="submit" class="kakao-map-btn">🗺️ 카카오맵 경로 보기</button>
+    </form>
+
+    <!-- 찜 버튼 -->
+    <div class="action-row">
+        <div sec:authorize="isAuthenticated()">
+            <form th:if="${!course.favorite}" th:action="@{'/courses/' + ${course.id} + '/favorite'}" method="post">
+                <button type="submit" class="action-btn primary">❤️ 찜하기</button>
+            </form>
+            <form th:if="${course.favorite}" th:action="@{'/courses/' + ${course.id} + '/unfavorite'}" method="post">
+                <button type="submit" class="action-btn logout">💔 찜 해제</button>
+            </form>
+        </div>
+        <div sec:authorize="isAnonymous()">
+            <form onsubmit="return handleLoginRequired()">
+                <button type="submit" class="action-btn primary">❤️ 찜하기</button>
+            </form>
+        </div>
+    </div>
+
+    <a href="/courses" class="back-link">← 산책 코스 목록</a>
+    <a href="/mypage" class="back-link">← 마이페이지</a>
+</div>
+
+<!-- 카카오맵 링크 JS -->
+<script th:inline="javascript">
+    function handleLoginRequired() {
+        if (confirm("로그인이 필요한 기능입니다.\n로그인 하시겠습니까?")) {
+            window.location.href = '/login?redirect=' + encodeURIComponent('[[${course.id}]]');
+        }
+        return false;
+    }
+
+    function openKakaoMapRoute() {
+        const pathPoints = [[${course.paths}]];
+        if (!pathPoints || pathPoints.length < 2) {
+            alert("경로 정보가 부족합니다.");
+            return false;
+        }
+
+        const start = pathPoints[0];
+        const end = pathPoints[pathPoints.length - 1];
+
+        const url = `https://map.kakao.com/link/by/walk/${encodeURIComponent('도착지')},${end.latitude},${end.longitude}` +
+            `/${encodeURIComponent('출발지')},${start.latitude},${start.longitude}`;
+
+        window.open(url, "_blank");
+        return false;
+    }
+</script>
+
+</body>
+</html>

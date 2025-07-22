@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+    <link rel="stylesheet" href="/css/board/update.css">
+</head>
+<body>
+<div class="container">
+    <h2>✏️ 게시글 수정</h2>
+
+    <form id="updateForm" enctype="multipart/form-data">
+        <input type="hidden" name="id" th:value="${boardUpdate.id}">
+        <input type="hidden" name="deleteFileIds" id="deleteFileIds">
+
+        <div class="row">
+            <div class="form-group">
+                <label>작성자</label>
+                <input type="text" name="boardWriter" th:value="${boardUpdate.boardWriter}" readonly>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>제목</label>
+            <input type="text" name="boardTitle" th:value="${boardUpdate.boardTitle}">
+        </div>
+
+        <div class="form-group">
+            <label>내용</label>
+            <textarea name="boardContents" cols="30" rows="5" th:text="${boardUpdate.boardContents}"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>📎 첨부파일</label>
+            <ul class="file-list">
+                <li th:each="file : ${boardUpdate.fileList}" th:attr="data-id=${file.id}">
+                    <a th:href="@{|/board/file/${file.id}|}" th:text="${file.originalFileName}" target="_blank"></a>
+                    <button type="button" onclick="deleteFile(this)">삭제</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="form-group">
+            <label>첨부파일 추가</label>
+            <input type="file" name="boardFile" multiple>
+        </div>
+
+        <input type="hidden" name="boardHits" th:value="${boardUpdate.boardHits}">
+
+        <div class="btn-box">
+            <button type="button" onclick="submitUpdate()">글 수정</button>
+        </div>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    function deleteFile(button) {
+        const li = button.closest("li");
+        const fileId = li.getAttribute("data-id");
+        li.remove();
+
+        const hiddenInput = document.getElementById("deleteFileIds");
+        if (hiddenInput.value) {
+            hiddenInput.value += "," + fileId;
+        } else {
+            hiddenInput.value = fileId;
+        }
+    }
+
+    function submitUpdate() {
+        const form = document.getElementById("updateForm");
+        const formData = new FormData(form);
+
+        fetch("/board/update", {
+            method: "POST",
+            body: formData
+        })
+            .then(res => {
+                if (res.ok) {
+                    res.text().then(data => {
+                        alert("게시글이 수정되었습니다.");
+                        if (data.startsWith("/board/")) {
+                            location.href = data;
+                        } else {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    alert("수정 실패!");
+                }
+            })
+            .catch(err => {
+                console.error("에러 발생:", err);
+                alert("오류가 발생했습니다.");
+            });
+    }
+</script>
+</body>
+</html>

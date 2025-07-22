@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>글 작성</title>
+    <link rel="stylesheet" href="/css/board/save.css">
+</head>
+<body>
+<div class="container">
+    <h2>📝 글 작성</h2>
+
+    <form th:action="@{/board/save}" method="post" enctype="multipart/form-data">
+        <label for="title">제목</label>
+        <input type="text" id="title" name="boardTitle" th:value="${boardTitle}">
+
+        <label for="contents">내용</label>
+        <textarea id="contents" name="boardContents" cols="30" rows="5" style="font-family: '맑은 고딕', sans-serif;" th:text="${boardContents}"></textarea>
+
+        <label for="file">첨부파일</label>
+        <input type="file" id="file" name="boardFile" th:value="${boardFile}" multiple>
+
+        <button type="submit" class="submit-btn">글 작성</button>
+    </form>
+
+    <a href="/board/paging" class="back-link">← 게시글 목록</a>
+</div>
+</body>
+</html>

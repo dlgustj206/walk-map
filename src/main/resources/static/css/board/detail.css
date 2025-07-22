@@ -1,0 +1,212 @@
+body {
+    font-family: '맑은 고딕', sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 1000px;
+    background: #fff;
+    padding: 40px 60px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 500px;
+    justify-content: flex-start;
+    margin: 50px auto;
+}
+
+h2 {
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.info-block {
+    flex: 0 0 48%;
+    border-collapse: collapse;
+}
+
+.info-block th {
+    background: #e9f2fb;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    width: 30%;
+    font-size: 14px;
+}
+
+.info-block td {
+    padding: 12px 20px;
+    width: 70%;
+    font-size: 14px;
+}
+
+.board-contents {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 20px;
+    background: #fafafa;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin-bottom: 0px;
+    min-height: 100px;
+    font-size: 14px;
+}
+
+.btn-box {
+    text-align: right;
+}
+
+.btn-box button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    margin-left: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.btn-box button:hover {
+    background: #0056b3;
+}
+
+.file-box {
+    margin-top: 5px;
+}
+
+.file-box h4 {
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+
+.file-item:hover {
+    background: #e9ecef;
+}
+
+.file-icon {
+    margin-right: 10px;
+}
+
+.file-item a {
+    color: #007bff;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.file-item a:hover {
+    text-decoration: underline;
+}
+
+.comment-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.comment-title .emoji {
+    font-size: 24px;
+}
+
+.comment-title .title {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.comment-header {
+    display: grid;
+    grid-template-columns: 180px 1fr 130px;
+    gap: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.comment-header input[type="text"] {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    height: 38px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.comment-header button {
+    height: 38px;
+    padding: 8px 16px;
+    background: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.comment-header button:hover {
+    background: #218838;
+}
+
+.comment-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.comment-table th,
+.comment-table td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.comment-table th {
+    background: #e9f2fb;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+}

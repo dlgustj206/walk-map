@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>산책 코스 목록</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/course/list.css">
+</head>
+<body>
+<div class="container">
+    <h1>📋 산책 코스 목록</h1>
+
+    <!-- 🔝 상단: 정렬 + 버튼 -->
+    <div class="top-bar">
+        <!-- 정렬 폼 -->
+        <form method="get" action="/courses" class="sort-form">
+            <label>정렬:
+                <select name="sort">
+                    <option value="default" th:selected="${sort == 'default'}">기본</option>
+                    <option value="distance" th:selected="${sort == 'distance'}">거리순</option>
+                    <option value="duration" th:selected="${sort == 'duration'}">소요시간순</option>
+                    <option value="favorite" th:selected="${sort == 'favorite'}">찜 많은순</option>
+                </select>
+            </label>
+
+            <label>난이도:
+                <select name="level">
+                    <option value="" th:selected="${level == null or level == ''}">전체</option>
+                    <option value="1" th:selected="${level == 1}">초급</option>
+                    <option value="2" th:selected="${level == 2}">중급</option>
+                    <option value="3" th:selected="${level == 3}">고급</option>
+                </select>
+            </label>
+
+            <label class="search-input">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="행정구 또는 행정동 입력" />
+            </label>
+
+            <button type="submit">적용</button>
+        </form>
+
+        <!-- 버튼들 -->
+        <div class="top-actions">
+            <a href="/mypage" class="action-btn primary">마이페이지</a>
+            <a href="/board/paging" class="action-btn primary">게시판</a>
+
+            <div sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" class="action-btn logout">로그아웃</button>
+                </form>
+            </div>
+            <div sec:authorize="isAnonymous()">
+                <form th:action="@{/login}" method="get" style="display:inline;">
+                    <button type="submit" class="action-btn login">로그인</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📋 코스 테이블 -->
+    <table class="course-table">
+        <thead>
+        <tr>
+            <th>코스명</th>
+            <th>거리</th>
+            <th>소요시간</th>
+            <th>난이도</th>
+            <th>찜</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="course : ${courses}">
+            <td>
+                <a th:href="@{'/courses/' + ${course.id}}" th:text="${course.name}"></a>
+            </td>
+            <td th:text="${course.distanceKm} + 'km'"></td>
+            <td th:text="${#strings.replace(course.duration, '시간', '시간 ')}"></td>
+            <td th:text="${course.level == 1 ? '초급' : (course.level == 2 ? '중급' : '고급')}"></td>
+            <td th:text="${course.favorite} + '개'"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 📄 페이지네이션 -->
+    <div class="pagination">
+        <a th:href="${page.hasPrevious()} ? @{/courses(page=${page.number - 1}, sort=${sort})} : '#'"
+           th:classappend="${!page.hasPrevious()} ? 'disabled'">‹ 이전</a>
+
+        <span th:text="${page.number + 1} + ' / ' + ${page.totalPages}">1 / 1</span>
+
+        <a th:href="${page.hasNext()} ? @{/courses(page=${page.number + 1}, sort=${sort})} : '#'"
+           th:classappend="${!page.hasNext()} ? 'disabled'">다음 ›</a>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 목록</title>
+    <link rel="stylesheet" href="/css/board/paging.css">
+</head>
+<body>
+<div class="container">
+    <h2>📋 게시판 목록</h2>
+
+    <!-- 버튼 영역 -->
+    <div class="top-actions">
+        <button class="action-btn primary" onclick="handleWriteClick()">글쓰기</button>
+        <a href="/courses" class="action-btn primary">산책 코스 목록</a>
+        <a href="/mypage" class="action-btn primary">마이페이지</a>
+
+        <div th:if="${#authorization.expression('isAuthenticated()')}">
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <input type="hidden" name="redirect" value="/board/paging">
+                <button type="submit" class="action-btn logout">로그아웃</button>
+            </form>
+        </div>
+        <div th:unless="${#authorization.expression('isAuthenticated()')}">
+            <form th:action="@{/login}" method="get" style="display:inline;">
+                <input type="hidden" name="redirect" value="/board/paging">
+                <button type="submit" class="action-btn login">로그인</button>
+            </form>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>첨부</th>
+            <th>작성자</th>
+            <th>등록일</th>
+            <th>조회</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="board : ${boardList.content}">
+            <td th:text="${board.id}"></td>
+            <td>
+                <a th:href="@{|/board/${board.id}|(page=${boardList.number + 1})}"
+                   th:text="${board.boardTitle}"></a>
+            </td>
+            <td>
+                <span th:if="${board.fileAttached == 1}">📎</span>
+            </td>
+            <td th:text="${board.boardWriter}"></td>
+            <td th:text="${#temporals.format(board.boardCreatedTime, 'yyyy-MM-dd')}"></td>
+            <td th:text="${board.boardHits}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <a th:href="${boardList.hasPrevious()} ? @{/board/paging(page=${boardList.number})} : '#'"
+           th:classappend="${!boardList.hasPrevious()} ? 'disabled'">‹ 이전</a>
+
+        <span th:text="${boardList.totalPages == 0} ? '0 / 0' : ${boardList.number + 1} + ' / ' + ${boardList.totalPages}"></span>
+
+        <a th:href="${boardList.hasNext()} ? @{/board/paging(page=${boardList.number + 2})} : '#'"
+           th:classappend="${!boardList.hasNext()} ? 'disabled'">다음 ›</a>
+    </div>
+
+    <script th:inline="javascript">
+        function handleWriteClick() {
+            const isLoggedIn = [[${#authorization.expression('isAuthenticated()')}]];
+            if (isLoggedIn) {
+                location.href = '/board/save';
+            } else {
+                if (confirm('로그인이 필요한 기능입니다. 로그인하시겠습니까?')) {
+                    location.href = '/login?redirect=/board/save';
+                }
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

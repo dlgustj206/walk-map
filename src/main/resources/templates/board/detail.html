@@ -1,0 +1,185 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 상세보기</title>
+    <link rel="stylesheet" href="/css/board/detail.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h2>📄 게시글 상세보기</h2>
+
+    <div class="info-row">
+        <table class="info-block">
+            <tr>
+                <th>제목</th>
+                <td th:text="${board.boardTitle}"></td>
+            </tr>
+            <tr>
+                <th>작성자</th>
+                <td th:text="${board.boardWriter}"></td>
+            </tr>
+        </table>
+        <table class="info-block">
+            <tr>
+                <th>조회수</th>
+                <td th:text="${board.boardHits}"></td>
+            </tr>
+            <tr>
+                <th>작성일</th>
+                <td th:text="${#temporals.format(board.boardCreatedTime, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="board-contents" th:text="${board.boardContents}"></div>
+
+    <div class="file-box" th:if="${board.fileAttached == 1}">
+        <h4>📎 첨부파일</h4>
+        <div class="file-list">
+            <div class="file-item" th:each="file : ${board.fileList}">
+                <span class="file-icon">🗂️</span>
+                <a th:href="@{'/board/download?fileId=' + ${file.id}}"
+                   th:text="${file.originalFileName}"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-box">
+        <button th:onclick="|location.href='@{/board/paging}'|">목록</button>
+
+        <th:block th:if="${#authorization.expression('isAuthenticated()') and board.boardWriter == loginUserNickname}">
+            <button th:onclick="|location.href='@{/board/update/{id}(id=${board.id})}'|">수정</button>
+            <button th:onclick="|location.href='@{/board/delete/{id}(id=${board.id})}'|">삭제</button>
+        </th:block>
+    </div>
+
+    <!-- 댓글 -->
+    <div class="comment-title">
+        <span class="emoji">💬</span>
+        <span class="title">댓글</span>
+    </div>
+
+    <!-- 로그인 상태 -->
+    <th:block th:if="${#authorization.expression('isAuthenticated()')}">
+        <div class="comment-header">
+            <input type="text" id="commentWriter" th:value="${loginUserNickname}" readonly>
+            <input type="text" id="commentContents" placeholder="내용">
+            <button type="button" onclick="commentWrite()">댓글 작성</button>
+        </div>
+    </th:block>
+
+    <!-- 비로그인 상태 -->
+    <th:block th:unless="${#authorization.expression('isAuthenticated()')}">
+        <div class="comment-header">
+            <input type="text" id="commentWriterGuest" value="로그인 필요" readonly>
+            <input type="text" id="commentContentsGuest" placeholder="내용" disabled>
+            <button type="button" onclick="requireLogin()">댓글 작성</button>
+        </div>
+    </th:block>
+
+    <table class="comment-table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>작성자</th>
+            <th>내용</th>
+            <th>작성일</th>
+            <th></th> <!-- 삭제 버튼용 빈 헤더 -->
+        </tr>
+        </thead>
+        <tbody id="comment-list">
+        <tr th:each="comment : ${commentList}">
+            <td th:text="${comment.id}"></td>
+            <td th:text="${comment.commentWriter}"></td>
+            <td th:text="${comment.commentContents}"></td>
+            <td th:text="${#temporals.format(comment.commentCreatedTime, 'yyyy-MM-dd HH:mm')}"></td>
+            <td>
+                <th:block th:if="${#authorization.expression('isAuthenticated()') and comment.commentWriter == loginUserNickname}">
+                    <button type="button"
+                            class="delete-btn"
+                            th:attr="data-id=${comment.id}"
+                            onclick="deleteComment(this)">삭제</button>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script th:inline="javascript">
+    const loginUserNickname = /*[[${loginUserNickname}]]*/ "";
+
+    const commentWrite = () => {
+        const writer = document.getElementById("commentWriter").value;
+        const contents = document.getElementById("commentContents").value;
+        const id = [[${board.id}]];
+
+        $.ajax({
+            type: "post",
+            url: "/comment/save",
+            data: {
+                "commentWriter": writer,
+                "commentContents": contents,
+                "boardId": id
+            },
+            success: function (res) {
+                let output = "";
+                for (let i in res) {
+                    output += "<tr>";
+                    output += "<td>" + res[i].id + "</td>";
+                    output += "<td>" + res[i].commentWriter + "</td>";
+                    output += "<td>" + res[i].commentContents + "</td>";
+                    const formattedTime = new Date(res[i].commentCreatedTime).toLocaleString('ko-KR', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                    output += "<td>" + formattedTime + "</td>";
+
+                    if (res[i].commentWriter === loginUserNickname) {
+                        output += "<td><button type='button' class='delete-btn' data-id='" + res[i].id + "' onclick='deleteComment(this)'>삭제</button></td>";
+                    } else {
+                        output += "<td></td>";
+                    }
+
+                    output += "</tr>";
+                }
+                document.getElementById('comment-list').innerHTML = output;
+                document.getElementById('commentContents').value = '';
+            },
+            error: function (err) {
+                console.log("요청 실패", err);
+            }
+        });
+    }
+
+    const deleteComment = (button) => {
+        const commentId = button.getAttribute("data-id");
+        if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+        $.ajax({
+            type: "delete",
+            url: `/comment/delete/${commentId}`,
+            success: function () {
+                alert("삭제되었습니다.");
+                location.reload();
+            },
+            error: function () {
+                alert("삭제 실패! 이미 지워졌거나 권한이 없습니다.");
+            }
+        });
+    }
+
+    const requireLogin = () => {
+        const confirmLogin = confirm("로그인이 필요한 기능입니다. 로그인하시겠습니까?");
+        if (confirmLogin) {
+            const redirect = window.location.pathname + window.location.search;
+            location.href = `/login?redirect=${encodeURIComponent(redirect)}`;
+        }
+    }
+</script>
+</body>
+</html>
+</body>
+</html>
