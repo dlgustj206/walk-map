@@ -29,26 +29,28 @@ public class MyPageController {
 
     @GetMapping
     public String showMyPage(@AuthenticationPrincipal UserEntity user,
-                             @RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "0", name = "favoritePage") int favoritePage,
                              @RequestParam(defaultValue = "0", name = "postPage") int postPage,
                              @RequestParam(defaultValue = "0", name = "commentPage") int commentPage,
                              Model model) {
+
         model.addAttribute("email", user.getEmail());
         model.addAttribute("nickname", user.getNickname());
 
-        Pageable pageable = PageRequest.of(page, 5);
+        // 각 섹션별 Pageable
+        Pageable favoritePageable = PageRequest.of(favoritePage, 5);
         Pageable postPageable = PageRequest.of(postPage, 5);
         Pageable commentPageable = PageRequest.of(commentPage, 5);
 
-        // 찜한 코스
-        Page<WalkCourseEntity> favoriteCourses = favoriteService.getMyFavorites(user, pageable);
+        // 찜한 산책 코스
+        Page<WalkCourseEntity> favoriteCourses = favoriteService.getMyFavorites(user, favoritePageable);
         model.addAttribute("favorites", favoriteCourses);
 
-        // 내가 쓴 글
+        // 내가 작성한 게시글
         Page<BoardEntity> myPosts = boardService.getMyPosts(user.getNickname(), postPageable);
         model.addAttribute("myPosts", myPosts);
 
-        // 내가 쓴 댓글
+        // 내가 작성한 댓글
         Page<CommentEntity> myComments = commentService.getMyComments(user.getNickname(), commentPageable);
         model.addAttribute("myComments", myComments);
 
